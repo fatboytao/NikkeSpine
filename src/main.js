@@ -173,7 +173,7 @@ var load = function (
 	}
 	var init = function () {
 		isMobile = checkMobile();
-		showMessage('部分角色无法加载，卡住请刷新，若有解决方案请移步github', 4000);
+		showMessage('滚动滚轮以缩放，点击画面开始拖动', 4000);
 		// Setup canvas and WebGL context. We pass alpha: false to canvas.getContext() so we don't use premultiplied alpha when
 		// loading textures. That is handled separately by PolygonBatcher.
 		canvas = document.getElementById('canvas');
