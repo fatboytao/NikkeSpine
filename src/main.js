@@ -1,5 +1,6 @@
 var load = function (
 	currentSkeleton = 'c010',
+	currentPosture = 'stand',
 	currentAnimation = 'idle',
 	dir = './assets/spine',
 	nameUrl = './assets/names.json'
@@ -17,7 +18,8 @@ var load = function (
 	var skeletonRenderer;
 	var debugRenderer;
 	var shapes;
-	var activeSkeleton = [];
+	var activeSkeleton;
+	var $activePosture = $('#stand');
 	var scaling = 1.0;
 	var offsetX = 0, offsetY = 0;
 	var msg;
@@ -64,7 +66,10 @@ var load = function (
 			skeletonList.append(option);
 		}
 		skeletonList.change(function () {
-			choose($('#skeletonList option:selected').text());
+			choose($('#skeletonList option:selected').text(), 'stand');
+			$activePosture.removeClass('active-posture');
+			$activePosture = $('#stand');
+			$activePosture.addClass('active-posture');
 		})
 
 		// set Selectable searchbox
@@ -137,6 +142,15 @@ var load = function (
 			$('#scaler').val(1.0 / scaling);
 		})
 
+		//set posture options
+		$activePosture.addClass('active-posture');
+		$('#posture>option').on('click',function(e){
+			$activePosture.removeClass('active-posture');
+			$activePosture = $(e.target);
+			$activePosture.addClass('active-posture');
+			choose(currentSkeleton, $activePosture.attr('id'));
+		})
+
 		// set translate method
 		$('#canvas').on('mousedown', function (e) {
 			var startX = e.clientX, startY = e.clientY;
@@ -206,37 +220,54 @@ var load = function (
 			getUrlParam();
 			setupUI();
 
-			loadAsset(currentSkeleton);
+			loadAsset(currentSkeleton, 'stand');
 
 			requestAnimationFrame(load);
 		})
 	}
-	var loadAsset = function (name) {
-		for (var i in nameList[name]) {
-			path = [dir, name, nameList[name][i], name + '_00'].join('/');
-			assetManager.loadBinary(path + '.skel');
-			assetManager.loadTextureAtlas(path + '.atlas');
+	var loadAsset = function (name, posture) {
+		if(posture == 'stand'){
+			path = [dir, name, nameList[name], name + '_00'].join('/');
 		}
+		else{
+			path = [dir, name, nameList[name], posture, [name, posture, '00'].join('_')].join('/');
+		}
+		assetManager.loadBinary(path + '.skel');
+		assetManager.loadTextureAtlas(path + '.atlas');
 	}
-	var choose = function (name) {
-		if (name === currentSkeleton) {
+	var choose = function (name, posture) {
+		if (name === currentSkeleton && posture === currentPosture) {
 			return;
 		}
-		loadAsset(name);
+		loadAsset(name, posture);
 		change = true;
 		currentSkeleton = name;
+		currentPosture = posture;
 	}
 	var load = function () {
 		$('#loading').css('display', '');
 		// Wait until the AssetManager has loaded all resources, then load the skeletons.
 		if (assetManager.isLoadingComplete()) {
-			activeSkeleton = [];
-			for (var i in nameList[currentSkeleton]) {
-				path = [dir, currentSkeleton, nameList[currentSkeleton][i], currentSkeleton + '_00'].join('/');
-				activeSkeleton[i] = loadSkeleton(path, currentAnimation, true);
+			if(currentPosture == 'stand'){
+				path = [dir, currentSkeleton, nameList[currentSkeleton], currentSkeleton + '_00'].join('/');
+				currentAnimation = 'idle';
+			}
+			else{
+				path = [dir, currentSkeleton, nameList[currentSkeleton], currentPosture, [currentSkeleton, currentPosture,'00'].join('_')].join('/');
+				currentAnimation = currentPosture + '_idle';
+			}
+			try{
+				activeSkeleton = loadSkeleton(path, currentAnimation, true);
+			}
+			catch(err){
+				console.log(err);
+				showMessage('Skeleton Not Found!', 2000);
+				choose(currentSkeleton, 'stand');
+				$activePosture.removeClass('active-posture');
+				$activePosture = $('#stand');
+				$activePosture.addClass('active-posture');
 			}
 			change = false;
-			currentAnimation = 'idle';
 			setupAnimationUI();
 			requestAnimationFrame(render);
 		} else {
@@ -280,8 +311,8 @@ var load = function (
 	var setupAnimationUI = function () {
 		var animationList = $('#animationList');
 		animationList.empty();
-		var skeleton = activeSkeleton[0].skeleton;
-		var state = activeSkeleton[0].state;
+		var skeleton = activeSkeleton.skeleton;
+		var state = activeSkeleton.state;
 		var activeAnimation = state.tracks[0].animation.name;
 		for (var i = 0; i < skeleton.data.animations.length; i++) {
 			var name = skeleton.data.animations[i].name;
@@ -291,13 +322,11 @@ var load = function (
 			animationList.append(option);
 		}
 		animationList.change(function () {
-			for (var i in activeSkeleton) {
-				var state = activeSkeleton[i].state;
-				var skeleton = activeSkeleton[i].skeleton;
-				var animationName = $('#animationList option:selected').text();
-				skeleton.setToSetupPose();
-				state.setAnimation(0, animationName, true);
-			}
+			var state = activeSkeleton.state;
+			var skeleton = activeSkeleton.skeleton;
+			var animationName = $('#animationList option:selected').text();
+			skeleton.setToSetupPose();
+			state.setAnimation(0, animationName, true);
 		})
 
 		resetTransform();
@@ -316,31 +345,29 @@ var load = function (
 		gl.clearColor(0.5, 0.5, 0.5, 1);
 		gl.clear(gl.COLOR_BUFFER_BIT);
 		// Apply the animation state based on the delta time.
-		for (var i in activeSkeleton) {
-			var state = activeSkeleton[i].state;
-			var skeleton = activeSkeleton[i].skeleton;
-			var bounds = activeSkeleton[i].bounds;
-			var premultipliedAlpha = activeSkeleton[i].premultipliedAlpha;
-			state.update(delta);
-			state.apply(skeleton);
-			skeleton.updateWorldTransform();
-			// Bind the shader and set the texture and model-view-projection matrix.
-			shader.bind();
-			shader.setUniformi(spine.Shader.SAMPLER, 0);
-			shader.setUniform4x4f(spine.Shader.MVP_MATRIX, mvp.values);
-			// Start the batch and tell the SkeletonRenderer to render the active skeleton.
-			batcher.begin(shader);
-			skeletonRenderer.premultipliedAlpha = premultipliedAlpha;
-			skeletonRenderer.draw(batcher, skeleton);
-			batcher.end();
-			shader.unbind();
-		}
+		var state = activeSkeleton.state;
+		var skeleton = activeSkeleton.skeleton;
+		var bounds = activeSkeleton.bounds;
+		var premultipliedAlpha = activeSkeleton.premultipliedAlpha;
+		state.update(delta);
+		state.apply(skeleton);
+		skeleton.updateWorldTransform();
+		// Bind the shader and set the texture and model-view-projection matrix.
+		shader.bind();
+		shader.setUniformi(spine.Shader.SAMPLER, 0);
+		shader.setUniform4x4f(spine.Shader.MVP_MATRIX, mvp.values);
+		// Start the batch and tell the SkeletonRenderer to render the active skeleton.
+		batcher.begin(shader);
+		skeletonRenderer.premultipliedAlpha = premultipliedAlpha;
+		skeletonRenderer.draw(batcher, skeleton);
+		batcher.end();
+		shader.unbind();
 		requestAnimationFrame(render);
 	}
 	var resize = function () {
 		var w = canvas.clientWidth;
 		var h = canvas.clientHeight;
-		var bounds = activeSkeleton[0].bounds;
+		var bounds = activeSkeleton.bounds;
 		if (canvas.width != w || canvas.height != h) {
 			canvas.width = w;
 			canvas.height = h;

@@ -1,7 +1,7 @@
 * { margin: 0; padding: 0; }
-body, html { height: 100%; font-size: 16px; }
+body, html { height: 100%; font-size: 16px; font-family: consolas;}
 canvas { position: absolute; width: 100% ;height: 100%; }
-#copyright{ position: fixed; text-align: center; margin: 10px; right: 0; bottom: 0; color: white; font-family: consolas;}
+#copyright{ position: fixed; text-align: center; margin: 10px; right: 0; bottom: 0; color: white;}
 #copyright a{ color: aqua;}
 .mobileCR{display: none;}
 #header{color: white; position: fixed; top: 0; width: 30rem; left: 50%; margin-left: -15rem; text-align: center;}
@@ -32,6 +32,43 @@ canvas { position: absolute; width: 100% ;height: 100%; }
     width: 8rem;
     height: 1.5rem;
     padding-left: .2rem;
+}
+#posture{
+    position: fixed;
+    right: 0;
+    top: 50%;
+    width: 8rem;
+    margin-top: -4.5rem;
+}
+#posture>option{
+    width: 8rem;
+    height: 2rem;
+    display: block;
+    margin: .5rem 0;
+    text-align: center;
+    font-size: 1.5rem;
+    color: whitesmoke;
+}
+#posture>option::before{
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -.1rem;
+    width: 0;
+    height: .1rem;
+    background: yellow;
+    transition: .2s;
+}
+#posture>option:hover{
+    color: aqua;
+    text-shadow: 0 0 .1rem aqua;
+}
+#posture>option.active-posture{
+    color: yellow;
+    text-align: left;
+}
+#posture>option.active-posture::before{
+    width: 100%;
 }
 .message{
     display: none;
@@ -166,10 +203,20 @@ canvas { position: absolute; width: 100% ;height: 100%; }
         width: 40px;
         height: 40px;
     }
-    #share svg{
+    #share svg,#reset svg{
         width: 30px;
         height: 30px;
         margin: 2px;
+    }
+    #posture{
+        width: 3rem;
+        margin-top: -1.8rem;
+    }
+    #posture>option{
+        width: 3rem;
+        height: 1rem;
+        margin: .1rem 0;
+        font-size: .8rem;
     }
 }
 
