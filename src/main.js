@@ -229,6 +229,9 @@ var load = function (
 		if(posture == 'stand'){
 			path = [dir, name, nameList[name]['skel'], name + '_00'].join('/');
 		}
+		else if(posture == 'skill'){
+			path = [dir, name, nameList[name]['skel'], name + '_skillcut'].join('/');
+		}
 		else{
 			path = [dir, name, nameList[name]['skel'], posture, [name, posture, '00'].join('_')].join('/');
 		}
@@ -251,13 +254,20 @@ var load = function (
 			if(currentPosture == 'stand'){
 				path = [dir, currentSkeleton, nameList[currentSkeleton]['skel'], currentSkeleton + '_00'].join('/');
 				currentAnimation = 'idle';
+				skin = '00';
+			}
+			else if(currentPosture == 'skill'){
+				path = [dir, currentSkeleton, nameList[currentSkeleton]['skel'], currentSkeleton + '_skillcut'].join('/');
+				currentAnimation = 'skillcut_1';
+				skin = 'default';
 			}
 			else{
 				path = [dir, currentSkeleton, nameList[currentSkeleton]['skel'], currentPosture, [currentSkeleton, currentPosture,'00'].join('_')].join('/');
 				currentAnimation = currentPosture + '_idle';
+				skin = '00';
 			}
 			try{
-				activeSkeleton = loadSkeleton(path, currentAnimation, true);
+				activeSkeleton = loadSkeleton(path, currentAnimation, true, skin);
 			}
 			catch(err){
 				console.log(err);
@@ -275,7 +285,7 @@ var load = function (
 		}
 	}
 	var loadSkeleton = function (path, initialAnimation, premultipliedAlpha, skin) {
-		if (skin === undefined) skin = '00';
+		if (skin === undefined) skin = 'default';
 		// Load the texture atlas using name.atlas from the AssetManager.
 		var atlas = assetManager.get(path + '.atlas');
 		// Create a AtlasAttachmentLoader that resolves region, mesh, boundingbox and path attachments
