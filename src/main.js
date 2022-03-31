@@ -144,7 +144,7 @@ var load = function (
 
 		//set posture options
 		$activePosture.addClass('active-posture');
-		$('#posture>option').on('click',function(e){
+		$('#posture>option').on('click', function (e) {
 			$activePosture.removeClass('active-posture');
 			$activePosture = $(e.target);
 			$activePosture.addClass('active-posture');
@@ -191,8 +191,8 @@ var load = function (
 		// Setup canvas and WebGL context. We pass alpha: false to canvas.getContext() so we don't use premultiplied alpha when
 		// loading textures. That is handled separately by PolygonBatcher.
 		canvas = document.getElementById('canvas');
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
+		canvas.width = window.innerWidth * 2;
+		canvas.height = window.innerHeight * 2;
 		var config = { alpha: false };
 		gl = canvas.getContext('webgl', config) || canvas.getContext('experimental-webgl', config);
 		if (!gl) {
@@ -226,13 +226,13 @@ var load = function (
 		})
 	}
 	var loadAsset = function (name, posture) {
-		if(posture == 'stand'){
+		if (posture == 'stand') {
 			path = [dir, name, nameList[name]['skel'], name + '_00'].join('/');
 		}
-		else if(posture == 'skill'){
+		else if (posture == 'skill') {
 			path = [dir, name, nameList[name]['skel'], name + '_skillcut'].join('/');
 		}
-		else{
+		else {
 			path = [dir, name, nameList[name]['skel'], posture, [name, posture, '00'].join('_')].join('/');
 		}
 		assetManager.loadBinary(path + '.skel');
@@ -251,25 +251,25 @@ var load = function (
 		$('#loading').css('display', '');
 		// Wait until the AssetManager has loaded all resources, then load the skeletons.
 		if (assetManager.isLoadingComplete()) {
-			if(currentPosture == 'stand'){
+			if (currentPosture == 'stand') {
 				path = [dir, currentSkeleton, nameList[currentSkeleton]['skel'], currentSkeleton + '_00'].join('/');
 				currentAnimation = 'idle';
 				skin = '00';
 			}
-			else if(currentPosture == 'skill'){
+			else if (currentPosture == 'skill') {
 				path = [dir, currentSkeleton, nameList[currentSkeleton]['skel'], currentSkeleton + '_skillcut'].join('/');
 				currentAnimation = 'skillcut_1';
 				skin = 'default';
 			}
-			else{
-				path = [dir, currentSkeleton, nameList[currentSkeleton]['skel'], currentPosture, [currentSkeleton, currentPosture,'00'].join('_')].join('/');
+			else {
+				path = [dir, currentSkeleton, nameList[currentSkeleton]['skel'], currentPosture, [currentSkeleton, currentPosture, '00'].join('_')].join('/');
 				currentAnimation = currentPosture + '_idle';
 				skin = '00';
 			}
-			try{
+			try {
 				activeSkeleton = loadSkeleton(path, currentAnimation, true, skin);
 			}
-			catch(err){
+			catch (err) {
 				console.log(err);
 				showMessage('Skeleton Not Found!', 2000);
 				choose(currentSkeleton, 'stand');
@@ -294,7 +294,7 @@ var load = function (
 		// var skeletonBinary = new spine.SkeletonBinary(atlasLoader);
 		var skeletonBinary = new spine.SkeletonBinary(atlasLoader);
 		// Set the scale to apply during parsing, parse the file, and create a new skeleton.
-		skeletonBinary.scale = isMobile ? 0.25 : 0.35;
+		skeletonBinary.scale = 0.7;
 		var skeletonData;
 		skeletonData = skeletonBinary.readSkeletonData(assetManager.get(path + '.skel'));
 		var skeleton = new spine.Skeleton(skeletonData);
@@ -378,9 +378,9 @@ var load = function (
 		var w = canvas.clientWidth;
 		var h = canvas.clientHeight;
 		var bounds = activeSkeleton.bounds;
-		if (canvas.width != w || canvas.height != h) {
-			canvas.width = w;
-			canvas.height = h;
+		if (canvas.width != w * 2 || canvas.height != h * 2) {
+			canvas.width = w * 2;
+			canvas.height = h * 2;
 		}
 		// magic
 		var centerX = bounds.offset.x + bounds.size.x / 2;
@@ -390,7 +390,7 @@ var load = function (
 		// var scale = Math.max(scaleX, scaleY) * 1.2;
 		var width = canvas.width * scaling;
 		var height = canvas.height * scaling;
-		mvp.ortho2d(centerX - offsetX * scaling - width / 2, centerY + offsetY * scaling - height / 2, width, height);
+		mvp.ortho2d(centerX - offsetX * scaling * 2 - width / 2, centerY + offsetY * scaling * 2 - height / 2, width, height);
 		gl.viewport(0, 0, canvas.width, canvas.height);
 	}
 
