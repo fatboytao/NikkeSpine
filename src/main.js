@@ -61,12 +61,12 @@ var load = function (
 		// set options
 		var skeletonList = $('#skeletonList');
 		for (var skeletonName in nameList) {
-			var option = $('<option></option>').attr('value', skeletonName).text(skeletonName);
+			var option = $('<option></option>').attr('value', skeletonName).text(nameList[skeletonName]['name']);
 			if (skeletonName === currentSkeleton) option.attr('selected', 'selected');
 			skeletonList.append(option);
 		}
 		skeletonList.change(function () {
-			choose($('#skeletonList option:selected').text(), 'stand');
+			choose($('#skeletonList option:selected').attr('value'), 'stand');
 			$activePosture.removeClass('active-posture');
 			$activePosture = $('#stand');
 			$activePosture.addClass('active-posture');
@@ -74,7 +74,7 @@ var load = function (
 
 		// set Selectable searchbox
 		$(function () {
-			$('#skeletonBox').attr('value', currentSkeleton);
+			$('#skeletonBox').attr('value', nameList[currentSkeleton]['name']);
 			$(document).on('click', function (e) {
 				e = e || window.event;
 				var elem = e.target || e.srcElement;
@@ -98,8 +98,8 @@ var load = function (
 			var skeletonList = $('#skeletonList');
 			skeletonList.html('');
 			for (var skeletonName in nameList) {
-				if (skeletonName.indexOf(this.value) != -1) {
-					var option = $('<option></option>').attr('value', skeletonName).text(skeletonName);
+				if (nameList[skeletonName]['name'].indexOf(this.value) != -1) {
+					var option = $('<option></option>').attr('value', skeletonName).text(nameList[skeletonName]['name']);
 					if (skeletonName === currentSkeleton) option.attr('selected', 'selected');
 					skeletonList.append(option);
 				}
@@ -227,10 +227,10 @@ var load = function (
 	}
 	var loadAsset = function (name, posture) {
 		if(posture == 'stand'){
-			path = [dir, name, nameList[name], name + '_00'].join('/');
+			path = [dir, name, nameList[name]['skel'], name + '_00'].join('/');
 		}
 		else{
-			path = [dir, name, nameList[name], posture, [name, posture, '00'].join('_')].join('/');
+			path = [dir, name, nameList[name]['skel'], posture, [name, posture, '00'].join('_')].join('/');
 		}
 		assetManager.loadBinary(path + '.skel');
 		assetManager.loadTextureAtlas(path + '.atlas');
@@ -249,11 +249,11 @@ var load = function (
 		// Wait until the AssetManager has loaded all resources, then load the skeletons.
 		if (assetManager.isLoadingComplete()) {
 			if(currentPosture == 'stand'){
-				path = [dir, currentSkeleton, nameList[currentSkeleton], currentSkeleton + '_00'].join('/');
+				path = [dir, currentSkeleton, nameList[currentSkeleton]['skel'], currentSkeleton + '_00'].join('/');
 				currentAnimation = 'idle';
 			}
 			else{
-				path = [dir, currentSkeleton, nameList[currentSkeleton], currentPosture, [currentSkeleton, currentPosture,'00'].join('_')].join('/');
+				path = [dir, currentSkeleton, nameList[currentSkeleton]['skel'], currentPosture, [currentSkeleton, currentPosture,'00'].join('_')].join('/');
 				currentAnimation = currentPosture + '_idle';
 			}
 			try{
