@@ -43,11 +43,13 @@ canvas { position: absolute; width: 100% ;height: 100%; }
 #posture>option{
     width: 8rem;
     height: 2rem;
+    position: relative;
     display: block;
     margin: .5rem 0;
     text-align: center;
     font-size: 1.5rem;
     color: whitesmoke;
+    cursor: pointer;
 }
 #posture>option::before{
     content: '';
