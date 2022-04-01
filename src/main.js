@@ -2,8 +2,7 @@ var load = function (
 	currentSkeleton = 'c010',
 	currentPosture = 'stand',
 	currentAnimation = 'idle',
-	dir = './assets/spine',
-	nameUrl = './assets/names.json'
+	cdn = 'https://cdn.jsdelivr.net/gh/Pelom777/NikkeSpine/'
 ) {
 	var isMobile;
 	var lastFrameTime = Date.now() / 1000;
@@ -23,6 +22,8 @@ var load = function (
 	var scaling = 1.0;
 	var offsetX = 0, offsetY = 0;
 	var msg;
+	var dir = cdn + 'assets/spine';
+	var nameUrl = cdn + 'assets/names.json';
 
 	var getUrlParam = function () {
 		var url = window.location.href;
